@@ -1,0 +1,12 @@
+# Скомпилированные файлы
+target/
+*.class
+
+# Настройки IntelliJ IDEA
+.idea/
+*.iml
+out/
+
+# Логи и временные файлы
+*.log
+.mvn/
