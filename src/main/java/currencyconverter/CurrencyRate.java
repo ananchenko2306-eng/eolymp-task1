@@ -3,6 +3,7 @@ package currencyconverter;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+@SuppressWarnings("unused")
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class CurrencyRate {
 
@@ -18,23 +19,20 @@ public class CurrencyRate {
     @JsonProperty("sale")
     private double saleRate;
 
-    public CurrencyRate() {
-    }
+    public CurrencyRate() {}
 
-    public String getCurrency() {
-        return currency;
-    }
+    public String getCurrency() { return currency; }
+    public String getBaseCurrency() { return baseCurrency; }
+    public double getBuyRate() { return buyRate; }
+    public double getSaleRate() { return saleRate; }
 
-    public double getBuyRate() {
-        return buyRate;
-    }
-
-    public double getSaleRate() {
-        return saleRate;
-    }
+    public void setCurrency(String currency) { this.currency = currency; }
+    public void setBaseCurrency(String baseCurrency) { this.baseCurrency = baseCurrency; }
+    public void setBuyRate(double buyRate) { this.buyRate = buyRate; }
+    public void setSaleRate(double saleRate) { this.saleRate = saleRate; }
 
     @Override
     public String toString() {
-        return "Валюта: " + currency + " -> Купівля: " + buyRate + ", Продаж: " + saleRate;
+        return String.format("%s: Купівля = %.4f, Продаж = %.4f", currency, buyRate, saleRate);
     }
 }
