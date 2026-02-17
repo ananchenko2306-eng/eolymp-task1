@@ -18,8 +18,8 @@ import java.util.Scanner;
 public class CurrencyExchanger {
 
     private static final String API_URL = "https://api.privatbank.ua/p24api/pubinfo?json&exchange&coursid=11";
-
     private static final String LOG_FILE_PATH = "C:\\java_logs\\operations.json";
+
     private static final ObjectMapper mapper = new ObjectMapper();
 
     public static void main(String[] args) {
@@ -30,9 +30,18 @@ public class CurrencyExchanger {
             List<CurrencyRate> listRates = getRates();
 
             Map<String, CurrencyRate> ratesMap = new HashMap<>();
+
             for (CurrencyRate rate : listRates) {
                 ratesMap.put(rate.getCurrency(), rate);
             }
+
+            CurrencyRate uahRate = new CurrencyRate();
+            uahRate.setCurrency("UAH");
+            uahRate.setBaseCurrency("UAH");
+            uahRate.setBuyRate(1.0);
+            uahRate.setSaleRate(1.0);
+
+            ratesMap.put("UAH", uahRate);
 
             boolean isRunning = true;
             while (isRunning) {
@@ -42,7 +51,7 @@ public class CurrencyExchanger {
 
                 switch (choice) {
                     case "1":
-                        for (CurrencyRate rate : ratesMap.values()) {
+                        for (CurrencyRate rate : listRates) {
                             System.out.println(rate);
                         }
                         break;
@@ -57,7 +66,7 @@ public class CurrencyExchanger {
                 }
             }
         } catch (Exception e) {
-            System.err.println("Помилка: " + e.getMessage());
+            System.err.println("Критична помилка програми: " + e.getMessage());
         }
     }
 
@@ -71,54 +80,65 @@ public class CurrencyExchanger {
     private static void convertCurrency(Scanner scanner, Map<String, CurrencyRate> rates) {
         System.out.print("Валюта, яку ВІДДАЄТЕ (UAH/USD/EUR): ");
         String from = scanner.nextLine().trim().toUpperCase();
+
         System.out.print("Валюта, яку ОТРИМУЄТЕ (UAH/USD/EUR): ");
         String to = scanner.nextLine().trim().toUpperCase();
+
         System.out.print("Сума: ");
+        String rawAmount = scanner.nextLine().trim();
 
         try {
-            double amount = Double.parseDouble(scanner.nextLine().trim());
-
-            boolean isFromValid = from.equals("UAH") || rates.containsKey(from);
-            boolean isToValid = to.equals("UAH") || rates.containsKey(to);
-
-            if (!isFromValid || !isToValid) {
-                System.out.println("Помилка: Введено невідому валюту.");
-                return;
+            if (!rates.containsKey(from)) {
+                throw new IllegalArgumentException("Невідома валюта продажу: " + from);
+            }
+            if (!rates.containsKey(to)) {
+                throw new IllegalArgumentException("Невідома валюта купівлі: " + to);
             }
 
-            double rateFromToUah = from.equals("UAH") ? 1.0 : rates.get(from).getBuyRate();
-            double rateUahToResult = to.equals("UAH") ? 1.0 : rates.get(to).getSaleRate();
+            double amount = Double.parseDouble(rawAmount);
+
+            if (amount < 0) {
+                throw new IllegalArgumentException("Сума не може бути від'ємною");
+            }
+
+            double rateFromToUah = rates.get(from).getBuyRate();
+            double rateUahToResult = rates.get(to).getSaleRate();
 
             double result = (amount * rateFromToUah) / rateUahToResult;
             result = Math.round(result * 100.0) / 100.0;
 
             System.out.printf("Результат: %.2f %s%n", result, to);
 
-            saveOperationToJson(from, to, amount, result);
+            saveOperationToJson(new ExchangeOperation(from, to, amount, result));
 
         } catch (NumberFormatException e) {
-            System.out.println("Введіть число");
+            System.out.println("Помилка: Ви ввели не число!");
+            saveOperationToJson(new ExchangeOperation(from, to, rawAmount, "Введено не число"));
+
+        } catch (IllegalArgumentException e) {
+            System.out.println("Помилка: " + e.getMessage());
+            saveOperationToJson(new ExchangeOperation(from, to, rawAmount, e.getMessage()));
+
+        } catch (Exception e) {
+            System.out.println("Невідома помилка: " + e.getMessage());
+            saveOperationToJson(new ExchangeOperation(from, to, rawAmount, "Інша помилка: " + e.getMessage()));
         }
     }
 
-    private static void saveOperationToJson(String from, String to, double amount, double result) {
+    private static void saveOperationToJson(ExchangeOperation operation) {
         File file = new File(LOG_FILE_PATH);
         List<ExchangeOperation> history = new ArrayList<>();
 
         try {
             if (file.exists() && file.length() > 0) {
-                history = mapper.readValue(file, new TypeReference<>() {
-                });
+                history = mapper.readValue(file, new TypeReference<>() {});
             }
-
-            ExchangeOperation newOp = new ExchangeOperation(from, to, amount, result);
-            history.add(newOp);
-
+            history.add(operation);
             mapper.writerWithDefaultPrettyPrinter().writeValue(file, history);
-            System.out.println("[Інфо: Операцію успішно збережено у файл JSON]");
+            System.out.println("[Лог записано у файл]");
 
         } catch (IOException e) {
-            System.err.println("Помилка збереження в JSON: " + e.getMessage());
+            System.err.println("Помилка запису у файл: " + e.getMessage());
         }
     }
 }
