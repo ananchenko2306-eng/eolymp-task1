@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <title>Обмін Валют</title>
+</head>
+<body style="font-family: Arial, sans-serif; margin: 40px; background-color: #f4f4f9;">
+
+<div style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); max-width: 400px;">
+    <h2>Конвертер валют</h2>
+
+    <form action="exchange" method="post">
+
+        <label for="fromCur">Валюта, яку ВІДДАЄТЕ (UAH/USD/EUR):</label><br>
+        <input type="text" id="fromCur" name="fromCurrency" required style="width: 100%; margin-bottom: 10px;"><br>
+
+        <label for="toCur">Валюта, яку ОТРИМУЄТЕ (UAH/USD/EUR):</label><br>
+        <input type="text" id="toCur" name="toCurrency" required style="width: 100%; margin-bottom: 10px;"><br>
+
+        <label for="amountValue">Сума:</label><br>
+        <input type="number" id="amountValue" step="0.01" name="amount" required style="width: 100%; margin-bottom: 20px;"><br>
+
+        <button type="submit" style="background: #007bff; color: white; border: none; padding: 10px 15px; border-radius: 5px; cursor: pointer;">
+            Конвертувати
+        </button>
+
+    </form>
+    </form>
+    <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;">
+    <a href="history" style="color: #666; text-decoration: none; font-size: 14px; display: block; text-align: center;" >Переглянути історію операцій</a>
+
+</div>
+
+</body>
+</html>
