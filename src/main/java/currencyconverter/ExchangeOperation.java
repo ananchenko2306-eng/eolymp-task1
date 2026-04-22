@@ -29,7 +29,7 @@ public class ExchangeOperation {
         this.toCurrency = toCurrency;
         this.amountGiven = 0;
         this.amountReceived = 0;
-        this.error = "Input: '" + inputValue + "' -> Error: " + errorMsg;
+        this.error = "Помилка: (вхідні дані: '" + inputValue + "' ): " + errorMsg;
     }
 
     public String getTime() { return time; }
